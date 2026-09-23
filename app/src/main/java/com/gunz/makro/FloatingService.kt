@@ -16,6 +16,7 @@ import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import android.widget.SeekBar
 import android.widget.TextView
 import kotlin.math.abs
 
@@ -24,22 +25,22 @@ class FloatingService : Service() {
     private lateinit var windowManager: WindowManager
     private val handler = Handler(Looper.getMainLooper())
 
-    // ---------- Tombol sentuh otomatis (bubble) ----------
+    // ---------- Tombol sentuh cepat (bubble) : TAHAN untuk aktif ----------
     private lateinit var bubbleView: View
     private lateinit var bubbleParams: WindowManager.LayoutParams
+    private lateinit var bubbleIcon: TextView
     private var autoTapIntervalMs = 150L
     private var isAutoTapping = false
 
+    // Drag hanya berlaku saat mode edit (unlocked dari panel)
     private var bubbleInitialX = 0
     private var bubbleInitialY = 0
     private var bubbleInitialTouchX = 0f
     private var bubbleInitialTouchY = 0f
     private var isBubbleDragging = false
     private val touchSlopPx = 18
-    private val longPressThresholdMs = 600L
-    private var longPressRunnable: Runnable? = null
 
-    // ---------- Bantuan mode edit (konfirmasi / matikan), dipicu dari panel ----------
+    // ---------- Bantuan mode edit (konfirmasi / matikan) ----------
     private var isEditMode = false
     private var confirmView: View? = null
     private var confirmParams: WindowManager.LayoutParams? = null
@@ -58,7 +59,7 @@ class FloatingService : Service() {
     private val autoCollapseRunnable = Runnable { collapsePanel() }
     private lateinit var btnCrosshair: TextView
 
-    // ---------- Crosshair (penanda titik ketuk) ----------
+    // ---------- Crosshair ----------
     private var crosshairView: View? = null
     private var crosshairParams: WindowManager.LayoutParams? = null
     private var crosshairInitialX = 0
@@ -66,6 +67,10 @@ class FloatingService : Service() {
     private var crosshairInitialTouchX = 0f
     private var crosshairInitialTouchY = 0f
     private var isCrosshairDragging = false
+
+    // ---------- Slider ukuran ----------
+    private var sizeSliderView: View? = null
+    private var sizeSliderParams: WindowManager.LayoutParams? = null
 
     private val autoTapRunnable = object : Runnable {
         override fun run() {
@@ -171,99 +176,97 @@ class FloatingService : Service() {
         }
     }
 
-    // ================= TOMBOL SENTUH OTOMATIS (BUBBLE) =================
+    // ================= TOMBOL SENTUH CEPAT (BUBBLE) =================
+    // Konsep baru: TAHAN = ketuk cepat berjalan, LEPAS = berhenti.
+    // Drag hanya bisa saat mode edit (dibuka dari panel).
 
     private fun setupBubble() {
         bubbleView = View.inflate(this, R.layout.floating_bubble, null)
+        bubbleIcon = bubbleView.findViewById(R.id.bubbleIcon)
+
+        val savedSizePx = dp(Prefs.getBubbleSizeDp(this))
+        bubbleIcon.layoutParams = bubbleIcon.layoutParams.apply {
+            width = savedSizePx
+            height = savedSizePx
+        }
+
         bubbleParams = newOverlayParams()
         bubbleParams.x = Prefs.getBubbleX(this, 100)
         bubbleParams.y = Prefs.getBubbleY(this, 300)
         windowManager.addView(bubbleView, bubbleParams)
 
-        val icon: TextView = bubbleView.findViewById(R.id.bubbleIcon)
-
-        icon.setOnTouchListener { _, event ->
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    bubbleInitialX = bubbleParams.x
-                    bubbleInitialY = bubbleParams.y
-                    bubbleInitialTouchX = event.rawX
-                    bubbleInitialTouchY = event.rawY
-                    isBubbleDragging = false
-
-                    // Tahan lama hanya berfungsi toggle saat TIDAK sedang mode edit.
-                    // Saat mode edit, sentuhan dipakai murni untuk menggeser posisi.
-                    if (!isEditMode) {
-                        longPressRunnable = Runnable {
-                            if (!isBubbleDragging) toggleAutoTap()
-                        }
-                        handler.postDelayed(longPressRunnable!!, longPressThresholdMs)
-                    }
-                    true
-                }
-
-                MotionEvent.ACTION_MOVE -> {
-                    // Bubble WAJIB dalam mode edit (dibuka dari panel kiri) baru bisa digeser.
-                    if (!isEditMode) return@setOnTouchListener true
-
-                    val dx = event.rawX - bubbleInitialTouchX
-                    val dy = event.rawY - bubbleInitialTouchY
-
-                    if (!isBubbleDragging && (abs(dx) > touchSlopPx || abs(dy) > touchSlopPx)) {
-                        isBubbleDragging = true
-                        longPressRunnable?.let { handler.removeCallbacks(it) }
-                    }
-
-                    if (isBubbleDragging) {
-                        bubbleParams.x = bubbleInitialX + dx.toInt()
-                        bubbleParams.y = bubbleInitialY + dy.toInt()
-                        windowManager.updateViewLayout(bubbleView, bubbleParams)
-                        repositionEditButtons()
-                    }
-                    true
-                }
-
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    longPressRunnable?.let { handler.removeCallbacks(it) }
-                    if (isBubbleDragging) {
-                        Prefs.saveBubblePosition(this, bubbleParams.x, bubbleParams.y)
-                    }
-                    isBubbleDragging = false
-                    true
-                }
-
-                else -> false
+        bubbleIcon.setOnTouchListener { _, event ->
+            if (isEditMode) {
+                handleBubbleDrag(event)
+            } else {
+                handleBubblePressHold(event)
             }
+            true
         }
-
-        updateBubbleColor()
     }
 
-    private fun toggleAutoTap() {
-        isAutoTapping = !isAutoTapping
-        if (isAutoTapping) {
-            if (MacroAccessibilityService.instance == null) {
-                isAutoTapping = false
-                return
-            }
-            autoTapIntervalMs = Prefs.getTapIntervalMs(this).toLong()
-            handler.post(autoTapRunnable)
-        } else {
-            handler.removeCallbacks(autoTapRunnable)
+    private fun handleBubblePressHold(event: MotionEvent) {
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> startAutoTap()
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> stopAutoTap()
         }
-        updateBubbleColor()
     }
 
-    private fun updateBubbleColor() {
-        val icon: TextView = bubbleView.findViewById(R.id.bubbleIcon)
-        icon.text = if (isAutoTapping) "●" else "M"
+    private fun handleBubbleDrag(event: MotionEvent) {
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                bubbleInitialX = bubbleParams.x
+                bubbleInitialY = bubbleParams.y
+                bubbleInitialTouchX = event.rawX
+                bubbleInitialTouchY = event.rawY
+                isBubbleDragging = false
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                val dx = event.rawX - bubbleInitialTouchX
+                val dy = event.rawY - bubbleInitialTouchY
+                if (!isBubbleDragging && (abs(dx) > touchSlopPx || abs(dy) > touchSlopPx)) {
+                    isBubbleDragging = true
+                }
+                if (isBubbleDragging) {
+                    bubbleParams.x = bubbleInitialX + dx.toInt()
+                    bubbleParams.y = bubbleInitialY + dy.toInt()
+                    windowManager.updateViewLayout(bubbleView, bubbleParams)
+                    repositionEditButtons()
+                }
+            }
+
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                if (isBubbleDragging) {
+                    Prefs.saveBubblePosition(this, bubbleParams.x, bubbleParams.y)
+                }
+                isBubbleDragging = false
+            }
+        }
+    }
+
+    private fun startAutoTap() {
+        if (isAutoTapping) return
+        if (MacroAccessibilityService.instance == null) return
+        isAutoTapping = true
+        autoTapIntervalMs = Prefs.getTapIntervalMs(this).toLong()
+        bubbleIcon.setBackgroundResource(R.drawable.bg_bubble_active)
+        handler.post(autoTapRunnable)
+    }
+
+    private fun stopAutoTap() {
+        if (!isAutoTapping) return
+        isAutoTapping = false
+        handler.removeCallbacks(autoTapRunnable)
+        bubbleIcon.setBackgroundResource(R.drawable.bg_bubble)
     }
 
     // ================= MODE EDIT (KONFIRMASI / MATIKAN) =================
-    // Wajib dibuka lewat panel tepi kiri. Selama mode ini aktif, bubble bisa
-    // digeser bebas; begitu dikonfirmasi (✓), bubble terkunci lagi (tidak bisa digeser).
+    // Wajib dibuka lewat panel tepi kiri (tombol ✎). Selama aktif, bubble
+    // bisa digeser; begitu dikonfirmasi (✓), bubble terkunci lagi.
 
     private fun toggleEditMode() {
+        stopAutoTap()
         if (isEditMode) {
             confirmPosition()
         } else {
@@ -321,8 +324,7 @@ class FloatingService : Service() {
         edgePanelView = View.inflate(this, R.layout.floating_edge_panel, null)
         edgePanelParams = newOverlayParams()
 
-        val buttonsColumn: View = edgePanelView.findViewById(R.id.panelButtonsColumn)
-        collapsedPanelX = -(dp(44) + dp(16)) // lebar tombol + padding kolom
+        collapsedPanelX = -(dp(44) + dp(16))
 
         edgePanelParams.x = collapsedPanelX
         edgePanelParams.y = Prefs.getPanelY(this, 500)
@@ -331,6 +333,7 @@ class FloatingService : Service() {
         val handle: View = edgePanelView.findViewById(R.id.panelHandle)
         btnCrosshair = edgePanelView.findViewById(R.id.btnCrosshair)
         val btnEditPosisi: TextView = edgePanelView.findViewById(R.id.btnEditPosisi)
+        val btnUkuran: TextView = edgePanelView.findViewById(R.id.btnUkuran)
 
         handle.setOnTouchListener { _, event ->
             when (event.actionMasked) {
@@ -347,11 +350,9 @@ class FloatingService : Service() {
                     val dx = event.rawX - panelInitialTouchX
                     val dy = event.rawY - panelInitialTouchY
 
-                    if (!isPanelExpanded && dx > dp(28) && abs(dx) > abs(dy)) {
-                        expandPanel()
-                        panelInteracted = true
-                    } else if (isPanelExpanded && dx < -dp(28) && abs(dx) > abs(dy)) {
-                        collapsePanel()
+                    // Geser horizontal ke arah mana pun (kiri/kanan) yang cukup jauh -> toggle buka/tutup
+                    if (abs(dx) > dp(28) && abs(dx) > abs(dy)) {
+                        if (isPanelExpanded) collapsePanel() else expandPanel()
                         panelInteracted = true
                     } else if (abs(dy) > touchSlopPx) {
                         edgePanelParams.y = panelInitialY + dy.toInt()
@@ -389,6 +390,11 @@ class FloatingService : Service() {
             toggleEditMode()
             handler.postDelayed(autoCollapseRunnable, 3000L)
         }
+
+        btnUkuran.setOnClickListener {
+            handler.removeCallbacks(autoCollapseRunnable)
+            toggleSizeSlider()
+        }
     }
 
     private fun expandPanel() {
@@ -401,6 +407,7 @@ class FloatingService : Service() {
         if (!isPanelExpanded) return
         isPanelExpanded = false
         animatePanelX(edgePanelParams.x, collapsedPanelX)
+        hideSizeSlider()
     }
 
     private fun animatePanelX(from: Int, to: Int) {
@@ -425,6 +432,63 @@ class FloatingService : Service() {
             hideCrosshair()
             btnCrosshair.setBackgroundResource(R.drawable.bg_panel_button)
         }
+    }
+
+    // ================= SLIDER UKURAN =================
+
+    private fun toggleSizeSlider() {
+        if (sizeSliderView != null) {
+            hideSizeSlider()
+        } else {
+            showSizeSlider()
+        }
+    }
+
+    private fun showSizeSlider() {
+        sizeSliderView = View.inflate(this, R.layout.floating_size_slider, null)
+        sizeSliderParams = newOverlayParams()
+        sizeSliderParams!!.x = dp(80)
+        sizeSliderParams!!.y = edgePanelParams.y
+        windowManager.addView(sizeSliderView, sizeSliderParams)
+
+        val seek: SeekBar = sizeSliderView!!.findViewById(R.id.seekUkuran)
+        val minDp = 40
+        val maxDp = 100
+        val currentDp = Prefs.getBubbleSizeDp(this)
+        seek.progress = ((currentDp - minDp) * 100 / (maxDp - minDp)).coerceIn(0, 100)
+
+        seek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (!fromUser) return
+                val newDp = minDp + ((maxDp - minDp) * progress / 100)
+                applyBubbleSize(newDp)
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                val newDp = minDp + ((maxDp - minDp) * seek.progress / 100)
+                Prefs.setBubbleSizeDp(this@FloatingService, newDp)
+            }
+        })
+
+        sizeSliderView!!.findViewById<View>(R.id.btnTutupUkuran).setOnClickListener {
+            hideSizeSlider()
+        }
+    }
+
+    private fun applyBubbleSize(sizeDp: Int) {
+        val sizePx = dp(sizeDp)
+        bubbleIcon.layoutParams = bubbleIcon.layoutParams.apply {
+            width = sizePx
+            height = sizePx
+        }
+        bubbleIcon.requestLayout()
+        if (isEditMode) repositionEditButtons()
+    }
+
+    private fun hideSizeSlider() {
+        sizeSliderView?.let { windowManager.removeView(it) }
+        sizeSliderView = null
+        sizeSliderParams = null
     }
 
     // ================= CROSSHAIR =================
@@ -494,6 +558,7 @@ class FloatingService : Service() {
         confirmView?.let { windowManager.removeView(it) }
         stopView?.let { windowManager.removeView(it) }
         crosshairView?.let { windowManager.removeView(it) }
+        sizeSliderView?.let { windowManager.removeView(it) }
     }
 
     companion object {

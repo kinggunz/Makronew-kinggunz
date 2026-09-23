@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="260dp"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:background="#EE1A1C22"
+    android:padding="10dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Kecil"
+        android:textColor="@color/grey_text"
+        android:textSize="10sp"
+        android:layout_marginEnd="4dp"/>
+
+    <SeekBar
+        android:id="@+id/seekUkuran"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:max="100"
+        android:progressTint="@color/accent"
+        android:thumbTint="@color/accent"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Besar"
+        android:textColor="@color/grey_text"
+        android:textSize="10sp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="10dp"/>
+
+    <TextView
+        android:id="@+id/btnTutupUkuran"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/bg_stop"
+        android:gravity="center"
+        android:text="✕"
+        android:textColor="@color/white"
+        android:textSize="14sp"/>
+
+</LinearLayout>

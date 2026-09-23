@@ -17,6 +17,7 @@ object Prefs {
     private const val KEY_CROSSHAIR_X = "crosshair_x"
     private const val KEY_CROSSHAIR_Y = "crosshair_y"
     private const val KEY_PANEL_Y = "panel_y"
+    private const val KEY_BUBBLE_SIZE_DP = "bubble_size_dp"
 
     private const val DEFAULT_INTERVAL_MS = 150
 
@@ -124,6 +125,17 @@ object Prefs {
 
     fun getPanelY(context: Context, default: Int): Int =
         context.getSharedPreferences(NAME, Context.MODE_PRIVATE).getInt(KEY_PANEL_Y, default)
+
+    // ---------- Ukuran tombol sentuh cepat ----------
+
+    fun getBubbleSizeDp(context: Context): Int =
+        context.getSharedPreferences(NAME, Context.MODE_PRIVATE).getInt(KEY_BUBBLE_SIZE_DP, 60)
+
+    fun setBubbleSizeDp(context: Context, sizeDp: Int) {
+        context.getSharedPreferences(NAME, Context.MODE_PRIVATE).edit()
+            .putInt(KEY_BUBBLE_SIZE_DP, sizeDp)
+            .apply()
+    }
 
     // ---------- Kecepatan ketuk otomatis ----------
 

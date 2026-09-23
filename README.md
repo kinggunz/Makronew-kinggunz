@@ -10,16 +10,17 @@ Aplikasi Android (Kotlin, native) — bukan simulasi. Fitur benar-benar berjalan
    - **Atur Kecepatan Ketuk Otomatis** — membuka halaman baru dengan slider dari **Lambat** sampai **Sangat Cepat** (20ms–1000ms per ketukan), ada tombol **Konfirmasi** dan **Kembali**.
    - **Tombol Mulai** (paling bawah) — **nonaktif (abu-abu)** selama Accessibility Service belum aktif atau belum ada aplikasi dipilih. Begitu ditekan: otomatis **membuka aplikasi target pertama** dan langsung menyalakan **mode mengambang** di atasnya.
 
-## Fitur mode mengambang (v4 — update terbaru)
-- **Bubble TERKUNCI secara default** — tidak bisa digeser sama sekali kecuali mode **Edit Posisi** dibuka dari panel tepi kiri (wajib lewat panel).
-- Saat mode Edit Posisi aktif: bubble bisa digeser bebas + muncul tombol ✓ (konfirmasi) dan ✕ (matikan). Begitu ✓ ditekan, posisi tersimpan dan **bubble langsung terkunci lagi**.
-- **Tahan lama (±600ms)** pada bubble (saat tidak dalam mode edit) → toggle ON/OFF ketuk-otomatis.
-- **Panel tepi kiri** — garis kecil oranye nempel di tepi kiri layar. Usap ke kanan (atau tap) untuk membuka, otomatis tertutup lagi setelah 3 detik tanpa disentuh. Bisa digeser naik-turun sepanjang tepi kiri. Isi panel:
-  - **⌖ Crosshair** — nyala/mati; ikon target merah yang bisa digeser bebas ke mana saja, jadi titik ketuk-otomatis bisa dipisah dari posisi bubble.
-  - **✎ Edit Posisi** — buka/tutup mode edit bubble di atas.
-- **Perbaikan penting**: semua jendela mengambang (bubble, panel, crosshair, tombol konfirmasi/matikan) diberi flag `FLAG_NOT_TOUCH_MODAL`, sehingga **layar/aplikasi di baliknya tetap 100% bisa disentuh dan digeser bebas** kapan saja — termasuk saat ketuk-otomatis sedang aktif — tanpa nyangkut sedikit pun.
+## Fitur mode mengambang (v5 — update terbaru)
+- **Konsep TAHAN-UNTUK-TEKAN**: tombol sentuh cepat kini transparan dengan garis lingkaran oranye dan teks "TAHAN TEKAN" di tengah. **Selama ditahan** → ketuk-otomatis berjalan terus. **Begitu dilepas** → langsung berhenti. Border berubah lebih terang/putih saat sedang aktif sebagai indikator visual.
+- **Bubble tetap TERKUNCI secara default** (tidak bisa digeser) kecuali mode **✎ Edit Posisi** dibuka dari panel tepi kiri. Saat mode edit aktif: bubble bisa digeser bebas + muncul tombol ✓ konfirmasi & ✕ matikan; begitu ✓ ditekan, langsung terkunci lagi.
+- **Panel tepi kiri**: hanya garis kecil terlihat di awal (fitur tidak langsung muncul). **Digeser ke arah mana pun** (kiri atau kanan) yang cukup jauh akan **membuka/menutup** panel; otomatis tertutup lagi setelah **3 detik** tanpa disentuh. Bisa digeser naik-turun di sepanjang tepi kiri. Isi panel:
+  - **⌖ Crosshair** — nyala/mati, ikon target merah yang bisa digeser bebas ke mana saja; kalau aktif, ketuk-otomatis menembak di posisi crosshair, bukan di posisi bubble.
+  - **✎ Edit Posisi** — buka/tutup mode edit bubble.
+  - **⤢ Ukuran** — buka slider untuk mengubah ukuran tombol sentuh cepat secara realtime, dari kecil sampai besar.
+- **Layar tetap 100% bebas digerakkan** kapan saja — termasuk **saat ketuk-otomatis sedang aktif** — berkat flag `FLAG_NOT_TOUCH_MODAL` di semua jendela mengambang. Kamu bisa menahan tombol sambil menyentuh bagian layar lain secara bersamaan tanpa nyangkut.
+- **Kompatibilitas**: minimum Android 7.0 (API 24) sampai versi Android terbaru — sudah ditambahkan properti `PROPERTY_SPECIAL_USE_FGS_SUBTYPE` di manifest supaya foreground service tetap berjalan aman di Android 14 ke atas.
+- **Tampilan menu utama sekarang landscape** (dua kolom: kiri status+kecepatan+tombol Mulai, kanan daftar aplikasi target), begitu juga semua halaman lain di aplikasi.
 - Notifikasi mode mengambang tetap ada tombol "Matikan" langsung.
-- Kecepatan ketuk otomatis mengikuti nilai dari halaman "Atur Kecepatan".
 
 ## Cara build APK LANGSUNG DARI HP (tanpa PC)
 

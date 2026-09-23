@@ -9,9 +9,14 @@
         android:layout_height="60dp"
         android:background="@drawable/bg_bubble"
         android:gravity="center"
-        android:text="M"
+        android:text="TAHAN\nTEKAN"
         android:textColor="@color/white"
         android:textStyle="bold"
-        android:textSize="20sp"/>
+        android:textSize="9sp"
+        android:lineSpacingExtra="-2sp"
+        android:shadowColor="#000000"
+        android:shadowDx="0"
+        android:shadowDy="0"
+        android:shadowRadius="4"/>
 
 </FrameLayout>

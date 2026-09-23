@@ -19,6 +19,7 @@
         <activity
             android:name=".SplashActivity"
             android:exported="true"
+            android:screenOrientation="landscape"
             android:theme="@style/Theme.MakroByGunz.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,16 +29,19 @@
 
         <activity
             android:name=".MainActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="landscape" />
 
         <activity
             android:name=".AppListActivity"
             android:exported="false"
+            android:screenOrientation="landscape"
             android:label="@string/pilih_aplikasi" />
 
         <activity
             android:name=".SpeedSettingsActivity"
             android:exported="false"
+            android:screenOrientation="landscape"
             android:label="Kecepatan Ketuk" />
 
         <service
@@ -55,7 +59,11 @@
         <service
             android:name=".FloatingService"
             android:exported="false"
-            android:foregroundServiceType="specialUse" />
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Menampilkan tombol dan panel kontrol mengambang untuk fitur ketuk otomatis" />
+        </service>
 
     </application>
 </manifest>
