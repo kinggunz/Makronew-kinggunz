@@ -1,0 +1,9 @@
+<resources>
+    <color name="bg_dark">#0F1115</color>
+    <color name="accent">#FF7A00</color>
+    <color name="accent_dark">#CC5F00</color>
+    <color name="white">#FFFFFF</color>
+    <color name="grey_text">#B0B3B8</color>
+    <color name="bubble_bg">#FF7A00</color>
+    <color name="confirm_green">#2ECC71</color>
+</resources>

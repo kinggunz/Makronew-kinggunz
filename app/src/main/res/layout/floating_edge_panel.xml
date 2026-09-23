@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical">
+
+    <!-- Kolom tombol (bagian ini yang sembunyi ke kiri saat collapsed) -->
+    <LinearLayout
+        android:id="@+id/panelButtonsColumn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#CC1A1C22"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/btnCrosshair"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_panel_button"
+            android:gravity="center"
+            android:text="⌖"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/btnEditPosisi"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/bg_panel_button"
+            android:gravity="center"
+            android:text="✎"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+    <!-- Garis pegangan: bagian yang selalu terlihat di tepi kiri layar -->
+    <View
+        android:id="@+id/panelHandle"
+        android:layout_width="14dp"
+        android:layout_height="64dp"
+        android:background="@drawable/bg_handle" />
+
+</LinearLayout>

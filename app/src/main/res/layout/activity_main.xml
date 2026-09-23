@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Makro by Gunz"
+        android:textColor="@color/white"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Status Aktivasi (paling atas) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#1AFFFFFF"
+        android:padding="14dp"
+        android:layout_marginBottom="20dp">
+
+        <TextView
+            android:id="@+id/tvStatusAksesibilitas"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Status Aktivasi: belum aktif"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <Button
+            android:id="@+id/btnAktivasi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Aktifkan Layanan Aksesibilitas"
+            android:backgroundTint="@color/accent"
+            android:textColor="@color/white"/>
+    </LinearLayout>
+
+    <!-- Daftar aplikasi target: bisa digeser urutannya + tombol tambah -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Aplikasi Target"
+        android:textColor="@color/grey_text"
+        android:textSize="13sp"
+        android:layout_marginBottom="8dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvSelectedApps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="90dp"
+        android:orientation="horizontal"
+        android:layout_marginBottom="20dp"/>
+
+    <!-- Tombol menuju halaman pengaturan kecepatan -->
+    <Button
+        android:id="@+id/btnKecepatan"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Atur Kecepatan Ketuk Otomatis"
+        android:backgroundTint="#33FFFFFF"
+        android:textColor="@color/white"
+        android:layout_marginBottom="8dp"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tahan lama ikon mengambang = mulai/berhenti ketuk otomatis. Ikon TERKUNCI (tidak bisa digeser) kecuali mode Edit Posisi dibuka dari panel tepi kiri. Usap dari tepi kiri layar = buka panel, otomatis tertutup setelah 3 detik. Layar tetap bisa disentuh/digeser bebas kapan saja."
+        android:textColor="@color/grey_text"
+        android:textSize="11sp"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Tombol Mulai (paling bawah) -->
+    <Button
+        android:id="@+id/btnMulai"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Mulai"
+        android:textSize="16sp"
+        android:backgroundTint="@color/confirm_green"
+        android:textColor="@color/white"
+        android:enabled="false"/>
+
+</LinearLayout>

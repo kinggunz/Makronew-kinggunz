@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Makro by Gunz</string>
+    <string name="pilih_aplikasi">Pilih Aplikasi</string>
+    <string name="accessibility_desc">Makro by Gunz memerlukan layanan aksesibilitas untuk menjalankan fitur ketuk otomatis (auto-tap) pada aplikasi yang kamu pilih.</string>
+</resources>
