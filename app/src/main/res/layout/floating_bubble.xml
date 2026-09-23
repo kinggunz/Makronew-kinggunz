@@ -9,7 +9,7 @@
         android:layout_height="60dp"
         android:background="@drawable/bg_bubble"
         android:gravity="center"
-        android:text="TAHAN\nTEKAN"
+        android:text="2x TAP"
         android:textColor="@color/white"
         android:textStyle="bold"
         android:textSize="9sp"

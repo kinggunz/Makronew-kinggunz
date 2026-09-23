@@ -111,7 +111,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tahan tombol mengambang = ketuk cepat. Geser dari tepi kiri layar = buka panel kontrol (crosshair, edit posisi, ukuran)."
+            android:text="Double tap tombol mengambang = mulai/berhenti ketuk cepat. Ketukan tetap jalan meski jari dilepas, jadi layar bebas dipakai kapan saja."
             android:textColor="@color/grey_text"
             android:textSize="10sp"
             android:layout_marginTop="10dp"/>

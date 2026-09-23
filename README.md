@@ -22,6 +22,12 @@ Aplikasi Android (Kotlin, native) — bukan simulasi. Fitur benar-benar berjalan
 - **Tampilan menu utama sekarang landscape** (dua kolom: kiri status+kecepatan+tombol Mulai, kanan daftar aplikasi target), begitu juga semua halaman lain di aplikasi.
 - Notifikasi mode mengambang tetap ada tombol "Matikan" langsung.
 
+## Fitur mode mengambang (v6 — perbaikan penting)
+- **Ganti dari "tahan" ke "double tap"** untuk tombol sentuh cepat. Alasan: saat ditahan, jari kamu jadi 1 sentuhan yang terus aktif berbarengan dengan ketukan sintetis ke aplikasi yang sama — inilah yang bikin layar terasa "tidak bisa disentuh yang lain". Ini keterbatasan sistem Android untuk fitur Accessibility Service, bukan bug dari kode, dan tidak bisa diperbaiki dengan izin tambahan.
+- **Solusinya**: **double tap** tombol mengambang untuk **mulai**, ketukan otomatis akan **terus berjalan di background** tanpa perlu jari menempel sama sekali — jadi layar 100% bebas dipakai untuk apa saja. **Double tap lagi** untuk **berhenti**.
+- Tampilan tombol tetap transparan bergaris lingkaran, sekarang teksnya "2x TAP" agar sesuai cara pakainya.
+- Semua fitur lain (panel tepi kiri, crosshair, ukuran, kunci geser lewat Edit Posisi, kompatibilitas Android 7+, tampilan landscape) tetap sama seperti sebelumnya.
+
 ## Cara build APK LANGSUNG DARI HP (tanpa PC)
 
 Build native Android (Gradle + Kotlin) tidak bisa jalan langsung di HP tanpa Android Studio/SDK. Cara paling praktis dari HP adalah **build di cloud pakai GitHub Actions** — workflow-nya sudah saya siapkan di `.github/workflows/build-apk.yml`, jadi HP kamu cuma tugasnya upload kode, sisanya di-build otomatis oleh server GitHub.

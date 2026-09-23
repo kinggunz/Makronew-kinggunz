@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -39,6 +40,7 @@ class FloatingService : Service() {
     private var bubbleInitialTouchY = 0f
     private var isBubbleDragging = false
     private val touchSlopPx = 18
+    private lateinit var doubleTapDetector: GestureDetector
 
     // ---------- Bantuan mode edit (konfirmasi / matikan) ----------
     private var isEditMode = false
@@ -195,20 +197,20 @@ class FloatingService : Service() {
         bubbleParams.y = Prefs.getBubbleY(this, 300)
         windowManager.addView(bubbleView, bubbleParams)
 
+        doubleTapDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
+            override fun onDoubleTap(e: MotionEvent): Boolean {
+                if (isAutoTapping) stopAutoTap() else startAutoTap()
+                return true
+            }
+        })
+
         bubbleIcon.setOnTouchListener { _, event ->
             if (isEditMode) {
                 handleBubbleDrag(event)
             } else {
-                handleBubblePressHold(event)
+                doubleTapDetector.onTouchEvent(event)
             }
             true
-        }
-    }
-
-    private fun handleBubblePressHold(event: MotionEvent) {
-        when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN -> startAutoTap()
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> stopAutoTap()
         }
     }
 
